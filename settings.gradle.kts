@@ -19,6 +19,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "GrpFindaBin"
+rootProject.name = "FindaBin"
 include(":app")
  
