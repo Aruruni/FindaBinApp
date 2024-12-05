@@ -37,7 +37,8 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         if (mapFragment == null) {
             mapFragment = SupportMapFragment.newInstance()
             supportFragmentManager.beginTransaction()
-                .add(R.id.map_fragment, mapFragment!!, "MAP_FRAGMENT")
+                .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
+                .replace(R.id.map_fragment, mapFragment!!, "MAP_FRAGMENT")
                 .commit()
         }
         mapFragment?.getMapAsync(this)
@@ -60,17 +61,15 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     private fun showBinFragment() {
-        if (binFragment == null) {
             binFragment = BinFragment()
             supportFragmentManager.beginTransaction()
                 .add(R.id.map_fragment, binFragment!!, "BIN_FRAGMENT")
                 .commit()
-        } else {
             supportFragmentManager.beginTransaction().apply {
                 binFragment?.let { show(it) }
                 mapFragment?.let { hide(it) }
                 commit()
-            }
+
         }
     }
 
@@ -130,7 +129,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
 
 class CustomInfoWindowAdapter(private val context: Context, private val userLocation: LatLng) : GoogleMap.InfoWindowAdapter {
     private val binTypes = mapOf(
-        "Luneta Dr. Hill Road" to "Bio/Non-Bio/Recycle",
+        "Luneta Hill Dr Road" to "Bio/Non-Bio/Recycle",
         "69 Session Rd" to "Bio/Non-Bio/Recycle",
         "Fr. Carlu St" to "Bio/Non-Bio/Recycle",
         "30 E Gov.Pack Rd" to "Bio/Recycle/Others",
@@ -182,7 +181,7 @@ class CustomInfoWindowAdapter(private val context: Context, private val userLoca
 
         val markerLocation = marker.position
         val distance = calculateDistance(userLocation, markerLocation)
-        distanceView.text = String.format("Distance: %.2f meters", distance)
+        distanceView.text = "Distance: ${distance.toInt()} meters"
 
         return view
     }

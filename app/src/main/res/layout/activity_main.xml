@@ -7,18 +7,28 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    <TextView
+    <FrameLayout
         android:id="@+id/textView"
         android:layout_width="415dp"
-        android:layout_height="60dp"
+        android:layout_height="100dp"
         android:gravity="center"
-        android:text="♻FindaBin"
         android:textAlignment="center"
-        android:textSize="30dp"
+        android:textSize="30sp"
+        android:textColor="#06E19A"
         app:layout_constraintBottom_toTopOf="@+id/map_container"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:src="@drawable/binlogo"
+            android:paddingTop="40dp"
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"/>
+
+    </FrameLayout>
 
     <FrameLayout
         android:id="@+id/map_container"
@@ -38,16 +48,6 @@
 
     </FrameLayout>
 
-    <FrameLayout
-        android:id="@+id/fragment_container"
-        android:layout_width="374dp"
-        android:layout_height="565dp"
-        android:visibility="visible"
-        app:layout_constraintBottom_toTopOf="@+id/bottom_nav_bar"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView" />
-
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottom_nav_bar"
@@ -55,7 +55,9 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_marginTop="24dp"
+        app:itemTextColor="#06E19A"
         app:itemIconSize="33dp"
+        app:itemIconTint="#06E19A"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
