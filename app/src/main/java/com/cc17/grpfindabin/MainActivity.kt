@@ -42,13 +42,15 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
                 .commit()
         }
         mapFragment?.getMapAsync(this)
-
-        findViewById<BottomNavigationView>(R.id.bottom_nav_bar).setOnItemSelectedListener { item ->
-            when (item.itemId) {
-                R.id.maps -> showMapFragment()
-                R.id.bins -> showBinFragment()
+        findViewById<BottomNavigationView>(R.id.bottom_nav_bar).apply {
+            itemIconTintList = null // Disable icon tinting to show original colors
+            setOnItemSelectedListener { item ->
+                when (item.itemId) {
+                    R.id.maps -> showMapFragment()
+                    R.id.bins -> showBinFragment()
+                }
+                true
             }
-            true
         }
     }
 

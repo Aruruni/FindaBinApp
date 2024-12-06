@@ -27,7 +27,6 @@
             android:layout_width="match_parent"
             android:layout_centerHorizontal="true"
             android:layout_centerVertical="true"/>
-
     </FrameLayout>
 
     <FrameLayout
@@ -55,9 +54,9 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_marginTop="24dp"
-        app:itemTextColor="#06E19A"
+        app:itemTextColor="#000000"
         app:itemIconSize="33dp"
-        app:itemIconTint="#06E19A"
+        app:itemIconTint="@null"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
