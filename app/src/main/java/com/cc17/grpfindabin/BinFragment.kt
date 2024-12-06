@@ -12,7 +12,7 @@ import com.google.android.gms.maps.model.LatLng
 
 class BinFragment : Fragment() {
 
-    private val userLocation = LatLng(16.408565, 120.597990)
+    val userLocation = UserLocationManager.userLocation ?: LatLng(0.00,0.00)
     private val binsData = listOf(
         Bin("Luneta Hill Dr Road", calculateDistance(LatLng(16.410639, 120.599366)), R.drawable.bins5),
         Bin("69 Session Rd", calculateDistance(LatLng(16.412823, 120.597364)), R.drawable.bins4),

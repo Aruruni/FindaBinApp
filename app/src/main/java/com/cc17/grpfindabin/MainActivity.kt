@@ -1,5 +1,6 @@
 package com.cc17.grpfindabin
 import android.content.Context
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.location.Location
@@ -9,6 +10,7 @@ import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.Fragment
@@ -22,11 +24,21 @@ import com.google.android.gms.maps.model.MapStyleOptions
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.material.bottomnavigation.BottomNavigationView
-
+import android.Manifest
+import android.content.Intent
+import android.net.Uri
+import android.widget.Toast
+import androidx.core.app.ActivityCompat
+import android.provider.Settings
+import android.content.DialogInterface
+import androidx.appcompat.app.AlertDialog
+import com.google.android.gms.location.LocationServices
 
 class MainActivity : AppCompatActivity(), OnMapReadyCallback {
+
     private var mapFragment: SupportMapFragment? = null
     private var binFragment: Fragment? = null
+    private var currentUserLocation: LatLng? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -42,15 +54,99 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
                 .commit()
         }
         mapFragment?.getMapAsync(this)
-
-        findViewById<BottomNavigationView>(R.id.bottom_nav_bar).setOnItemSelectedListener { item ->
-            when (item.itemId) {
-                R.id.maps -> showMapFragment()
-                R.id.bins -> showBinFragment()
+        findViewById<BottomNavigationView>(R.id.bottom_nav_bar).apply {
+            itemIconTintList = null // Disable icon tinting to show original colors
+            setOnItemSelectedListener { item ->
+                when (item.itemId) {
+                    R.id.maps -> showMapFragment()
+                    R.id.bins -> showBinFragment()
+                }
+                true
             }
-            true
+        }
+        requestLocationPermission()
+    }
+
+    private fun fetchCurrentLocation() {
+        val fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+        if (ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            return
+        }
+        fusedLocationClient.lastLocation.addOnSuccessListener { location ->
+            if (location != null) {
+                currentUserLocation = LatLng(location.latitude, location.longitude)
+                UserLocationManager.userLocation = LatLng(location.latitude, location.longitude)
+                mapFragment?.getMapAsync(this)
+            } else {
+                Toast.makeText(this, "Failed to get current location.", Toast.LENGTH_SHORT).show()
+            }
+        }.addOnFailureListener {
+            Toast.makeText(this, "Error fetching location: ${it.message}", Toast.LENGTH_SHORT).show()
         }
     }
+    private fun requestLocationPermission() {
+        if (ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+        } else {
+
+            onPermissionGranted()
+        }
+    }
+
+    private val requestPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            onPermissionGranted()
+        } else {
+            onPermissionDenied()
+        }
+    }
+
+    private fun onPermissionGranted() {
+        // Provide feedback to the user
+        Toast.makeText(this, "Permission granted. Accessing location...", Toast.LENGTH_SHORT).show()
+        fetchCurrentLocation()
+    }
+
+    private fun onPermissionDenied() {
+        // Provide clear feedback and guide the user
+        Toast.makeText(
+            this,
+            "Permission denied. Location features won't be available.",
+            Toast.LENGTH_LONG
+        ).show()
+
+        // Optionally show a dialog explaining why the permission is important
+        showPermissionDeniedDialog()
+    }
+
+    private fun showPermissionDeniedDialog() {
+        AlertDialog.Builder(this)
+            .setTitle("Location Permission Required")
+            .setMessage("This app requires location access to show nearby bins. Please grant the permission in settings.")
+            .setPositiveButton("Open Settings") { _, _ ->
+                // Open app settings to allow the user to grant the permission
+                val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+                val uri = Uri.fromParts("package", packageName, null)
+                intent.data = uri
+                startActivity(intent)
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+
 
     private fun showMapFragment() {
         supportFragmentManager.beginTransaction().apply {
@@ -80,14 +176,14 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
         map?.apply {
 
             setMapStyle(MapStyleOptions.loadRawResourceStyle(this@MainActivity, R.raw.map_style))
-            val userLocation = LatLng(16.408565, 120.597990)
+            val userLocation = currentUserLocation ?: LatLng(0.0,0.0)
             moveCamera(CameraUpdateFactory.newLatLngZoom(userLocation, 17f))
 
             val userMarker = MarkerOptions()
-            userMarker.position(userLocation)
-            userMarker.title("You")
-            addMarker(createMarker(userLocation, "You", R.drawable.location))
-            userMarker.icon(BitmapDescriptorFactory.fromBitmap(getBitmapFromDrawable(R.drawable.location)))
+                .position(userLocation)
+                .title("You")
+                .icon(BitmapDescriptorFactory.fromBitmap(getBitmapFromDrawable(R.drawable.location)))
+            addMarker(userMarker)
 
             map.setInfoWindowAdapter(CustomInfoWindowAdapter(this@MainActivity, userLocation))
 
@@ -185,5 +281,6 @@ class CustomInfoWindowAdapter(private val context: Context, private val userLoca
 
         return view
     }
+
 }
 
